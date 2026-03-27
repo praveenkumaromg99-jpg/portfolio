@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel — Praveen's Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:      #0d1117;
+      --bg2:     #161b22;
+      --surface: #1c2333;
+      --ink:     #e6edf3;
+      --muted:   #8b949e;
+      --accent:  #3fb950;
+      --gold:    #f0c060;
+      --red:     #f85149;
+      --border:  #30363d;
+      --radius:  12px;
+      --sans:    'DM Sans', sans-serif;
+      --serif:   'DM Serif Display', serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* NAV */
+    nav {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+
+    .nav-logo {
+      font-family: var(--serif);
+      font-size: 1.2rem;
+      background: linear-gradient(135deg, var(--accent), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-link {
+      color: var(--muted);
+      font-size: 0.85rem;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-link:hover { color: var(--accent); }
+
+    /* LAYOUT */
+    .wrapper {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 24px;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 28px;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      position: sticky;
+      top: 80px;
+      height: fit-content;
+    }
+
+    .sidebar-menu {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      list-style: none;
+    }
+
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 18px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border-bottom: 1px solid var(--border);
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .sidebar-menu li a:hover,
+    .sidebar-menu li a.active {
+      background: rgba(63,185,80,0.08);
+      color: var(--accent);
+    }
+
+    .sidebar-menu li:last-child a { border-bottom: none; }
+
+    /* STATS ROW */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .stat-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 14px;
+      text-align: center;
+    }
+
+    .stat-box .num {
+      font-family: var(--serif);
+      font-size: 1.8rem;
+      background: linear-gradient(135deg, var(--accent), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-box .lbl {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* PANELS */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .panel-title {
+      font-family: var(--serif);
+      font-size: 1.6rem;
+      margin-bottom: 24px;
+      color: var(--ink);
+    }
+
+    /* CARDS */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+
+    .card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 18px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+    }
+
+    /* FORM */
+    .form-group { margin-bottom: 16px; }
+
+    label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+    }
+
+    textarea { resize: vertical; min-height: 100px; }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    /* FILE DROP ZONE */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: var(--accent);
+      background: rgba(63,185,80,0.05);
+    }
+
+    .drop-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .drop-zone .icon { font-size: 2.5rem; margin-bottom: 10px; }
+    .drop-zone p { color: var(--muted); font-size: 0.9rem; }
+    .drop-zone .file-name { color: var(--accent); margin-top: 8px; font-size: 0.85rem; }
+
+    /* BUTTONS */
+    .btn {
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: var(--sans);
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #238636, var(--accent));
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(63,185,80,0.3);
+    }
+
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(63,185,80,0.45); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .btn-danger {
+      background: transparent;
+      border: 1px solid var(--red);
+      color: var(--red);
+      padding: 6px 14px;
+      font-size: 0.8rem;
+    }
+
+    .btn-danger:hover { background: rgba(248,81,73,0.1); }
+
+    /* TOAST */
+    #toast {
+      position: fixed;
+      bottom: 28px; right: 28px;
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      border-radius: 10px;
+      padding: 14px 22px;
+      color: var(--accent);
+      font-weight: 500;
+      font-size: 0.9rem;
+      z-index: 9999;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s;
+    }
+
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast.error { border-color: var(--red); color: var(--red); }
+
+    /* PROGRESS BAR */
+    .progress { display: none; margin-top: 14px; }
+    .progress-bar {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--gold));
+      width: 0%;
+      transition: width 0.3s;
+      border-radius: 3px;
+    }
+    .progress-text { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
+
+    /* TABLE */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    th {
+      text-align: left;
+      padding: 10px 14px;
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--ink);
+      vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 100px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-pdf   { background: rgba(248,81,73,0.15); color: #f85149; }
+    .badge-pptx  { background: rgba(240,192,96,0.15); color: var(--gold); }
+    .badge-xlsx  { background: rgba(63,185,80,0.15); color: var(--accent); }
+    .badge-ipynb { background: rgba(88,166,255,0.15); color: #58a6ff; }
+    .badge-pbix  { background: rgba(210,153,249,0.15); color: #d2a8ff; }
+    .badge-img   { background: rgba(255,166,87,0.15); color: #ffa657; }
+    .badge-other { background: rgba(139,148,158,0.15); color: var(--muted); }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--muted);
+    }
+
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+
+    @media (max-width: 768px) {
+      .wrapper { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .stats-row { grid-template-columns: repeat(3,1fr); }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">⚙️ Admin Panel</div>
+  <a href="/" class="nav-link">← Back to Portfolio</a>
+</nav>
+
+<div class="wrapper">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <ul class="sidebar-menu">
+      <li><a onclick="showPanel('dashboard')" class="active">📊 Dashboard</a></li>
+      <li><a onclick="showPanel('upload')">📤 Upload File</a></li>
+      <li><a onclick="showPanel('projects')">🗂️ Projects</a></li>
+      <li><a onclick="showPanel('documents')">📄 Documents</a></li>
+      <li><a onclick="showPanel('blog')">✍️ Blog & Writing</a></li>
+      <li><a onclick="showPanel('files')">🗄️ All Files</a></li>
+      <li><a onclick="showPanel('messages')">✉️ Messages</a></li>
+    </ul>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main>
+
+    <!-- DASHBOARD -->
+    <div id="panel-dashboard" class="panel active">
+      <h2 class="panel-title">Dashboard</h2>
+      <div class="stats-row" id="stats-row">
+        <div class="stat-box"><div class="num" id="stat-projects">—</div><div class="lbl">Projects</div></div>
+        <div class="stat-box"><div class="num" id="stat-documents">—</div><div class="lbl">Documents</div></div>
+        <div class="stat-box"><div class="num" id="stat-blog">—</div><div class="lbl">Blog Posts</div></div>
+        <div class="stat-box"><div class="num" id="stat-files">—</div><div class="lbl">Files</div></div>
+        <div class="stat-box"><div class="num" id="stat-messages">—</div><div class="lbl">Messages</div></div>
+      </div>
+
+      <div class="card">
+        <h3>Quick Actions</h3>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="showPanel('upload')">📤 Upload File</button>
+          <button class="btn btn-primary" onclick="showPanel('projects')">➕ Add Project</button>
+          <button class="btn btn-primary" onclick="showPanel('documents')">📄 Add Document</button>
+          <button class="btn btn-primary" onclick="showPanel('blog')">✍️ Write Post</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Recent Files</h3>
+        <div id="recent-files"><div class="empty-state"><div class="icon">📂</div><p>No files yet</p></div></div>
+      </div>
+    </div>
+
+    <!-- UPLOAD FILE -->
+    <div id="panel-upload" class="panel">
+      <h2 class="panel-title">Upload File</h2>
+      <div class="card">
+        <h3>Supported formats: PDF, PPTX, XLSX, IPYNB, PY, PBIX, PNG, JPG</h3>
+        <div class="drop-zone" id="drop-zone">
+          <input type="file" id="file-input" accept=".pdf,.pptx,.ppt,.xlsx,.xls,.ipynb,.py,.pbix,.png,.jpg,.jpeg,.gif,.webp,.csv,.docx" />
+          <div class="icon">📁</div>
+          <p>Drag & drop your file here or <strong style="color:var(--accent)">click to browse</strong></p>
+          <div class="file-name" id="file-name-display">No file selected</div>
+        </div>
+        <div class="progress" id="upload-progress">
+          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+          <div class="progress-text" id="progress-text">Uploading...</div>
+        </div>
+        <div style="margin-top:18px;">
+          <button class="btn btn-primary" onclick="uploadFile()" id="upload-btn">📤 Upload File</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROJECTS -->
+    <div id="panel-projects" class="panel">
+      <h2 class="panel-title">Projects</h2>
+      <div class="card">
+        <h3>Add New Project</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Title *</label>
+            <input type="text" id="proj-title" placeholder="Statistical Analysis Project" />
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select id="proj-category">
+              <option>Statistics</option>
+              <option>Python</option>
+              <option>SQL</option>
+              <option>Power BI</option>
+              <option>Excel</option>
+              <option>PowerPoint</option>
+              <option>General</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="proj-desc" placeholder="Describe your project..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tools Used (comma separated)</label>
+            <input type="text" id="proj-tools" placeholder="Python, Pandas, Matplotlib" />
+          </div>
+          <div class="form-group">
+            <label>Link (GitHub/Drive)</label>
+            <input type="text" id="proj-link" placeholder="https://github.com/..." />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Attach File (optional)</label>
+          <div class="drop-zone" style="padding:20px;">
+            <input type="file" id="proj-file" />
+            <p>📎 Attach project file (PDF, PPTX, XLSX, IPYNB...)</p>
+            <div class="file-name" id="proj-file-name">No file selected</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="addProject()">➕ Add Project</button>
+      </div>
+
+      <div class="card">
+        <h3>All Projects</h3>
+        <div id="projects-list"><div class="empty-state"><div class="icon">🗂️</div><p>No projects yet</p></div></div>
+      </div>
+    </div>
+
+    <!-- DOCUMENTS -->
+    <div id="panel-documents" class="panel">
+      <h2 class="panel-title">Documents</h2>
+      <div class="card">
+        <h3>Add Thesis / Article / Report</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Title *</label>
+            <input type="text" id="doc-title" placeholder="My Research Thesis" />
+          </div>
+          <div class="form-group">
+            <label>Type</label>
+            <select id="doc-type">
+              <option>Thesis</option>
+              <option>Article</option>
+              <option>Report</option>
+              <option>Research Paper</option>
+              <option>Assignment</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="doc-desc" placeholder="Brief description..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Upload File (PDF recommended)</label>
+          <div class="drop-zone" style="padding:20px;">
+            <input type="file" id="doc-file" accept=".pdf,.docx,.pptx" />
+            <p>📄 Upload PDF, DOCX or PPTX</p>
+            <div class="file-name" id="doc-file-name">No file selected</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="addDocument()">📄 Add Document</button>
+      </div>
+
+      <div class="card">
+        <h3>All Documents</h3>
+        <div id="documents-list"><div class="empty-state"><div class="icon">📄</div><p>No documents yet</p></div></div>
+      </div>
+    </div>
+
+    <!-- BLOG -->
+    <div id="panel-blog" class="panel">
+      <h2 class="panel-title">Blog & Writing</h2>
+      <div class="card">
+        <h3>Write New Post / Poem / Story</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Title *</label>
+            <input type="text" id="blog-title" placeholder="My First Blog Post" />
+          </div>
+          <div class="form-group">
+            <label>Type</label>
+            <select id="blog-type">
+              <option value="blog">Blog Post</option>
+              <option value="poem">Poem</option>
+              <option value="story">Short Story</option>
+              <option value="article">Article</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Tags (comma separated)</label>
+          <input type="text" id="blog-tags" placeholder="statistics, python, poetry" />
+        </div>
+        <div class="form-group">
+          <label>Content *</label>
+          <textarea id="blog-content" style="min-height:200px;" placeholder="Write your post here..."></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="addBlog()">✍️ Publish Post</button>
+      </div>
+
+      <div class="card">
+        <h3>All Posts</h3>
+        <div id="blog-list"><div class="empty-state"><div class="icon">✍️</div><p>No posts yet</p></div></div>
+      </div>
+    </div>
+
+    <!-- ALL FILES -->
+    <div id="panel-files" class="panel">
+      <h2 class="panel-title">All Files</h2>
+      <div class="card">
+        <h3>Filter</h3>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="loadFiles('')">All</button>
+          <button class="btn btn-primary" style="background:rgba(248,81,73,0.2);color:#f85149;box-shadow:none;" onclick="loadFiles('documents')">PDF</button>
+          <button class="btn btn-primary" style="background:rgba(240,192,96,0.2);color:var(--gold);box-shadow:none;" onclick="loadFiles('presentations')">PPTX</button>
+          <button class="btn btn-primary" style="background:rgba(63,185,80,0.2);color:var(--accent);box-shadow:none;" onclick="loadFiles('excel')">Excel</button>
+          <button class="btn btn-primary" style="background:rgba(88,166,255,0.2);color:#58a6ff;box-shadow:none;" onclick="loadFiles('notebooks')">Python</button>
+          <button class="btn btn-primary" style="background:rgba(255,166,87,0.2);color:#ffa657;box-shadow:none;" onclick="loadFiles('images')">Images</button>
+        </div>
+      </div>
+      <div class="card">
+        <div id="files-list"><div class="empty-state"><div class="icon">🗄️</div><p>No files yet</p></div></div>
+      </div>
+    </div>
+
+    <!-- MESSAGES -->
+    <div id="panel-messages" class="panel">
+      <h2 class="panel-title">Messages</h2>
+      <div class="card">
+        <div id="messages-list"><div class="empty-state"><div class="icon">✉️</div><p>No messages yet</p></div></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const API = "http://localhost:5000/api";
+
+  // =============================================
+  // PANEL NAVIGATION
+  // =============================================
+  function showPanel(name) {
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    document.querySelectorAll(".sidebar-menu a").forEach(a => a.classList.remove("active"));
+    document.getElementById("panel-" + name).classList.add("active");
+    event.target.classList.add("active");
+
+    if (name === "dashboard") { loadStats(); loadRecentFiles(); }
+    if (name === "projects")  loadProjects();
+    if (name === "documents") loadDocuments();
+    if (name === "blog")      loadBlog();
+    if (name === "files")     loadFiles("");
+    if (name === "messages")  loadMessages();
+  }
+
+  // =============================================
+  // TOAST
+  // =============================================
+  function toast(msg, isError=false) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.className = "show" + (isError ? " error" : "");
+    setTimeout(() => t.className = "", 3000);
+  }
+
+  // =============================================
+  // FILE INPUT DISPLAY
+  // =============================================
+  document.getElementById("file-input").addEventListener("change", e => {
+    document.getElementById("file-name-display").textContent = e.target.files[0]?.name || "No file selected";
+  });
+  document.getElementById("proj-file").addEventListener("change", e => {
+    document.getElementById("proj-file-name").textContent = e.target.files[0]?.name || "No file selected";
+  });
+  document.getElementById("doc-file").addEventListener("change", e => {
+    document.getElementById("doc-file-name").textContent = e.target.files[0]?.name || "No file selected";
+  });
+
+  // DRAG & DROP
+  const dz = document.getElementById("drop-zone");
+  dz.addEventListener("dragover", e => { e.preventDefault(); dz.classList.add("dragover"); });
+  dz.addEventListener("dragleave", () => dz.classList.remove("dragover"));
+  dz.addEventListener("drop", e => {
+    e.preventDefault();
+    dz.classList.remove("dragover");
+    document.getElementById("file-input").files = e.dataTransfer.files;
+    document.getElementById("file-name-display").textContent = e.dataTransfer.files[0]?.name;
+  });
+
+  // =============================================
+  // UPLOAD FILE
+  // =============================================
+  async function uploadFile() {
+    const fileInput = document.getElementById("file-input");
+    if (!fileInput.files[0]) { toast("Please select a file first!", true); return; }
+
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+
+    const btn  = document.getElementById("upload-btn");
+    const prog = document.getElementById("upload-progress");
+    const fill = document.getElementById("progress-fill");
+    const txt  = document.getElementById("progress-text");
+
+    btn.disabled = true;
+    prog.style.display = "block";
+    fill.style.width = "30%";
+    txt.textContent = "Uploading...";
+
+    try {
+      const res  = await fetch(`${API}/upload`, { method: "POST", body: formData });
+      const data = await res.json();
+      fill.style.width = "100%";
+      if (data.success) {
+        txt.textContent = `✅ Uploaded: ${data.file.original} (${data.file.size_kb} KB)`;
+        toast("File uploaded successfully! ✅");
+        fileInput.value = "";
+        document.getElementById("file-name-display").textContent = "No file selected";
+      } else {
+        txt.textContent = "❌ " + data.error;
+        toast(data.error, true);
+      }
+    } catch(e) {
+      txt.textContent = "❌ Could not connect to backend. Is app.py running?";
+      toast("Backend not running! Run: python app.py", true);
+    }
+    btn.disabled = false;
+  }
+
+  // =============================================
+  // STATS
+  // =============================================
+  async function loadStats() {
+    try {
+      const res  = await fetch(`${API}/stats`);
+      const data = await res.json();
+      document.getElementById("stat-projects").textContent  = data.projects;
+      document.getElementById("stat-documents").textContent = data.documents;
+      document.getElementById("stat-blog").textContent      = data.blog;
+      document.getElementById("stat-files").textContent     = data.files;
+      document.getElementById("stat-messages").textContent  = data.messages;
+    } catch(e) {
+      toast("Backend not running! Run: python app.py", true);
+    }
+  }
+
+  async function loadRecentFiles() {
+    try {
+      const res   = await fetch(`${API}/files`);
+      const files = await res.json();
+      const el    = document.getElementById("recent-files");
+      if (!files.length) { el.innerHTML = `<div class="empty-state"><div class="icon">📂</div><p>No files yet</p></div>`; return; }
+      el.innerHTML = `<table><thead><tr><th>File</th><th>Type</th><th>Size</th><th>Date</th></tr></thead><tbody>` +
+        files.slice(0,5).map(f => `<tr>
+          <td>${f.original}</td>
+          <td><span class="badge badge-${f.file_type}">${f.file_type.toUpperCase()}</span></td>
+          <td>${f.size_kb} KB</td>
+          <td>${f.uploaded_at?.slice(0,10)}</td>
+        </tr>`).join("") + `</tbody></table>`;
+    } catch(e) {}
+  }
+
+  // =============================================
+  // PROJECTS
+  // =============================================
+  async function addProject() {
+    const title = document.getElementById("proj-title").value.trim();
+    if (!title) { toast("Title is required!", true); return; }
+
+    const formData = new FormData();
+    formData.append("title",       title);
+    formData.append("description", document.getElementById("proj-desc").value);
+    formData.append("category",    document.getElementById("proj-category").value);
+    formData.append("tools",       document.getElementById("proj-tools").value);
+    formData.append("link",        document.getElementById("proj-link").value || "#");
+    const file = document.getElementById("proj-file").files[0];
+    if (file) formData.append("file", file);
+
+    try {
+      const res = await fetch(`${API}/projects`, { method: "POST", body: formData });
+      if (res.ok) { toast("Project added! ✅"); loadProjects(); clearForm(["proj-title","proj-desc","proj-tools","proj-link"]); }
+      else toast("Error adding project", true);
+    } catch(e) { toast("Backend not running!", true); }
+  }
+
+  async function loadProjects() {
+    try {
+      const res      = await fetch(`${API}/projects`);
+      const projects = await res.json();
+      const el       = document.getElementById("projects-list");
+      if (!projects.length) { el.innerHTML = `<div class="empty-state"><div class="icon">🗂️</div><p>No projects yet</p></div>`; return; }
+      el.innerHTML = `<table><thead><tr><th>Title</th><th>Category</th><th>Tools</th><th>Date</th><th></th></tr></thead><tbody>` +
+        projects.map(p => `<tr>
+          <td><strong>${p.title}</strong></td>
+          <td><span class="badge badge-other">${p.category}</span></td>
+          <td style="color:var(--muted);font-size:0.82rem;">${Array.isArray(p.tools) ? p.tools.join(", ") : p.tools}</td>
+          <td style="color:var(--muted);">${p.created_at?.slice(0,10)}</td>
+          <td><button class="btn btn-danger" onclick="deleteItem('projects',${p.id})">🗑️</button></td>
+        </tr>`).join("") + `</tbody></table>`;
+    } catch(e) {}
+  }
+
+  // =============================================
+  // DOCUMENTS
+  // =============================================
+  async function addDocument() {
+    const title = document.getElementById("doc-title").value.trim();
+    if (!title) { toast("Title is required!", true); return; }
+
+    const formData = new FormData();
+    formData.append("title",       title);
+    formData.append("description", document.getElementById("doc-desc").value);
+    formData.append("doc_type",    document.getElementById("doc-type").value);
+    const file = document.getElementById("doc-file").files[0];
+    if (file) formData.append("file", file);
+
+    try {
+      const res = await fetch(`${API}/documents`, { method: "POST", body: formData });
+      if (res.ok) { toast("Document added! ✅"); loadDocuments(); clearForm(["doc-title","doc-desc"]); }
+      else toast("Error adding document", true);
+    } catch(e) { toast("Backend not running!", true); }
+  }
+
+  async function loadDocuments() {
+    try {
+      const res  = await fetch(`${API}/documents`);
+      const docs = await res.json();
+      const el   = document.getElementById("documents-list");
+      if (!docs.length) { el.innerHTML = `<div class="empty-state"><div class="icon">📄</div><p>No documents yet</p></div>`; return; }
+      el.innerHTML = `<table><thead><tr><th>Title</th><th>Type</th><th>Date</th><th></th></tr></thead><tbody>` +
+        docs.map(d => `<tr>
+          <td><strong>${d.title}</strong><br><small style="color:var(--muted)">${d.description||""}</small></td>
+          <td><span class="badge badge-pdf">${d.doc_type}</span></td>
+          <td style="color:var(--muted);">${d.created_at?.slice(0,10)}</td>
+          <td><button class="btn btn-danger" onclick="deleteItem('documents',${d.id})">🗑️</button></td>
+        </tr>`).join("") + `</tbody></table>`;
+    } catch(e) {}
+  }
+
+  // =============================================
+  // BLOG
+  // =============================================
+  async function addBlog() {
+    const title   = document.getElementById("blog-title").value.trim();
+    const content = document.getElementById("blog-content").value.trim();
+    if (!title || !content) { toast("Title and content required!", true); return; }
+    const tags = document.getElementById("blog-tags").value.split(",").map(t=>t.trim()).filter(Boolean);
+
+    try {
+      const res = await fetch(`${API}/blog`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, content, post_type: document.getElementById("blog-type").value, tags })
+      });
+      if (res.ok) { toast("Post published! ✅"); loadBlog(); clearForm(["blog-title","blog-tags","blog-content"]); }
+      else toast("Error publishing post", true);
+    } catch(e) { toast("Backend not running!", true); }
+  }
+
+  async function loadBlog() {
+    try {
+      const res   = await fetch(`${API}/blog`);
+      const posts = await res.json();
+      const el    = document.getElementById("blog-list");
+      if (!posts.length) { el.innerHTML = `<div class="empty-state"><div class="icon">✍️</div><p>No posts yet</p></div>`; return; }
+      el.innerHTML = `<table><thead><tr><th>Title</th><th>Type</th><th>Tags</th><th>Date</th><th></th></tr></thead><tbody>` +
+        posts.map(p => `<tr>
+          <td><strong>${p.title}</strong></td>
+          <td><span class="badge badge-other">${p.post_type}</span></td>
+          <td style="color:var(--muted);font-size:0.82rem;">${Array.isArray(p.tags) ? p.tags.join(", ") : p.tags}</td>
+          <td style="color:var(--muted);">${p.created_at?.slice(0,10)}</td>
+          <td><button class="btn btn-danger" onclick="deleteItem('blog',${p.id})">🗑️</button></td>
+        </tr>`).join("") + `</tbody></table>`;
+    } catch(e) {}
+  }
+
+  // =============================================
+  // FILES
+  // =============================================
+  async function loadFiles(category) {
+    try {
+      const url   = category ? `${API}/files?category=${category}` : `${API}/files`;
+      const res   = await fetch(url);
+      const files = await res.json();
+      const el    = document.getElementById("files-list");
+      if (!files.length) { el.innerHTML = `<div class="empty-state"><div class="icon">🗄️</div><p>No files yet</p></div>`; return; }
+      el.innerHTML = `<table><thead><tr><th>Filename</th><th>Type</th><th>Category</th><th>Size</th><th>Date</th><th></th></tr></thead><tbody>` +
+        files.map(f => `<tr>
+          <td><a href="http://localhost:5000/uploads/${f.path}" target="_blank" style="color:var(--accent);">${f.original}</a></td>
+          <td><span class="badge badge-${f.file_type}">${f.file_type.toUpperCase()}</span></td>
+          <td style="color:var(--muted);">${f.category}</td>
+          <td>${f.size_kb} KB</td>
+          <td style="color:var(--muted);">${f.uploaded_at?.slice(0,10)}</td>
+          <td><button class="btn btn-danger" onclick="deleteItem('files',${f.id})">🗑️</button></td>
+        </tr>`).join("") + `</tbody></table>`;
+    } catch(e) {}
+  }
+
+  // =============================================
+  // MESSAGES
+  // =============================================
+  async function loadMessages() {
+    try {
+      const res      = await fetch(`${API}/messages`);
+      const messages = await res.json();
+      const el       = document.getElementById("messages-list");
+      if (!messages.length) { el.innerHTML = `<div class="empty-state"><div class="icon">✉️</div><p>No messages yet</p></div>`; return; }
+      el.innerHTML = messages.map(m => `
+        <div style="border-bottom:1px solid var(--border);padding:16px 0;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+            <strong>${m.name}</strong>
+            <span style="color:var(--muted);font-size:0.82rem;">${m.timestamp?.slice(0,10)}</span>
+          </div>
+          <div style="color:var(--accent);font-size:0.82rem;margin-bottom:8px;">${m.email}</div>
+          <div style="color:var(--muted);">${m.message}</div>
+        </div>`).join("");
+    } catch(e) {}
+  }
+
+  // =============================================
+  // DELETE
+  // =============================================
+  async function deleteItem(type, id) {
+    if (!confirm("Delete this item?")) return;
+    try {
+      await fetch(`${API}/${type}/${id}`, { method: "DELETE" });
+      toast("Deleted! ✅");
+      if (type === "projects")  loadProjects();
+      if (type === "documents") loadDocuments();
+      if (type === "blog")      loadBlog();
+      if (type === "files")     loadFiles("");
+    } catch(e) { toast("Error deleting", true); }
+  }
+
+  // =============================================
+  // HELPERS
+  // =============================================
+  function clearForm(ids) {
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = "";
+    });
+  }
+
+  // =============================================
+  // INIT
+  // =============================================
+  loadStats();
+  loadRecentFiles();
+</script>
+</body>
+</html>
