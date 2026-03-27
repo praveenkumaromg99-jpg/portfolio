@@ -469,22 +469,20 @@ def stats():
         "messages":  conn.execute("SELECT COUNT(*) FROM messages").fetchone()[0],
     })
 
+# Initialize database on startup (works for both local and Railway)
+with app.app_context():
+    init_db()
+
 # =============================================
 # START
 # =============================================
 if __name__ == "__main__":
     init_db()
+    port = int(os.environ.get("PORT", 5000))
     print("\n" + "="*48)
     print(f"  {YOUR_NAME}'s Portfolio Backend ✅")
-    print("  Website  → http://localhost:5000")
-    print("  Admin    → http://localhost:5000/admin")
-    print("  API:")
-    print("    GET  /api/profile")
-    print("    GET  /api/projects    POST /api/projects")
-    print("    GET  /api/documents   POST /api/documents")
-    print("    GET  /api/blog        POST /api/blog")
-    print("    POST /api/upload      GET  /api/files")
-    print("    POST /api/contact     GET  /api/messages")
-    print("    GET  /api/stats")
+    print(f"  Running on port {port}")
+    print("  Website  → /")
+    print("  Admin    → /admin")
     print("="*48 + "\n")
-    app.run(debug=True, port=5000)
+    app.run(debug=False, host="0.0.0.0", port=port)
